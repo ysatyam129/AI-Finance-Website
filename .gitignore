@@ -11,6 +11,12 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Netlify
+.netlify/
+
+# Functions
+netlify/functions/node_modules/
+
 # Next.js
 client/.next/
 client/out/
