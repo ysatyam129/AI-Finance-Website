@@ -14,6 +14,7 @@ A full-stack personal finance tracker with expense management, visual analytics,
 ## Tech Stack
 
 ### Frontend
+
 - **Next.js 14** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
@@ -22,6 +23,7 @@ A full-stack personal finance tracker with expense management, visual analytics,
 - **Axios** - API calls
 
 ### Backend
+
 - **Node.js + Express** - Server
 - **MongoDB + Mongoose** - Database
 - **JWT** - Authentication
@@ -31,6 +33,7 @@ A full-stack personal finance tracker with expense management, visual analytics,
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MongoDB (local or cloud)
 - Gmail account (for email notifications)
@@ -38,28 +41,31 @@ A full-stack personal finance tracker with expense management, visual analytics,
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone <repository-url>
 cd aifinance_web
 ```
 
 2. **Setup Backend**
+
 ```bash
 cd server
 npm install
 ```
 
 3. **Setup Frontend**
+
 ```bash
 cd ../client
 npm install
 ```
 
 4. **Configure Environment**
+
 ```bash
 # In server/.env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/aifinance
 JWT_SECRET=your_jwt_secret_key_here
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
@@ -67,6 +73,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 5. **Start the Application**
+
 ```bash
 # Terminal 1 - Backend
 cd server
@@ -78,6 +85,7 @@ npm run dev
 ```
 
 6. **Access the Application**
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
@@ -92,15 +100,18 @@ npm run dev
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 
 ### Expenses
+
 - `GET /api/expenses` - Get user expenses
 - `POST /api/expenses` - Add new expense
 - `GET /api/expenses/stats` - Get monthly statistics
 
 ### Utilities
+
 - `POST /api/seed/expenses` - Add sample expenses
 
 ## Email Configuration
