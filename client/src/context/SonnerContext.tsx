@@ -85,7 +85,7 @@ export const SonnerProvider = ({ children }: SonnerProviderProps) => {
       {children}
       
       {/* Sonner Container */}
-      <div className="fixed top-4 right-4 z-50 space-y-2 pointer-events-none">
+      <div className="fixed top-4 left-4 z-[9998] space-y-3 max-w-sm pointer-events-none">
         <AnimatePresence>
           {sonners.map((sonner) => (
             <div key={sonner.id} className="pointer-events-auto">

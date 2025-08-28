@@ -63,11 +63,11 @@ const Sonner = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 300, scale: 0.95 }}
+      initial={{ opacity: 0, x: -300, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 300, scale: 0.95 }}
+      exit={{ opacity: 0, x: -300, scale: 0.95 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`relative flex items-start gap-3 p-4 rounded-xl border backdrop-blur-sm shadow-lg min-w-[350px] max-w-md ${backgrounds[type]}`}
+      className={`relative flex items-start gap-3 p-4 rounded-xl border backdrop-blur-md shadow-xl min-w-[350px] max-w-md ${backgrounds[type]}`}
     >
       {/* Progress Bar */}
       {type !== "loading" && (
@@ -105,7 +105,7 @@ const Sonner = ({
       {type !== "loading" && (
         <button
           onClick={() => onClose(id)}
-          className="flex-shrink-0 p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+          className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 transition-all duration-200 text-gray-400 hover:text-gray-600 hover:scale-110"
         >
           <X className="w-4 h-4" />
         </button>

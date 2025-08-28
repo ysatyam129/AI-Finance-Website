@@ -47,7 +47,7 @@ const Toast = ({ id, title, description, type = "info", duration = 5000, onClose
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -50, scale: 0.95 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`relative flex items-start gap-3 p-4 rounded-lg border shadow-lg backdrop-blur-sm ${colors[type]} max-w-md`}
+      className={`relative flex items-start gap-3 p-4 rounded-xl border shadow-xl backdrop-blur-md ${colors[type]} w-full min-w-[320px]`}
     >
       <div className={`flex-shrink-0 ${iconColors[type]}`}>
         {icons[type]}
@@ -62,7 +62,7 @@ const Toast = ({ id, title, description, type = "info", duration = 5000, onClose
       </div>
       <button
         onClick={() => onClose(id)}
-        className="flex-shrink-0 p-1 rounded-md hover:bg-black/10 transition-colors"
+        className="flex-shrink-0 p-1.5 rounded-full hover:bg-black/10 transition-all duration-200 hover:scale-110"
       >
         <X className="w-4 h-4" />
       </button>
