@@ -21,6 +21,9 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/seed', seedRoutes);
+app.get('/test',(req,res)=>{
+  res.send("API is running....")
+})
 
 // Schedule balance check every day at 9 AM
 const job = new cron.CronJob('0 9 * * *', checkLowBalance);

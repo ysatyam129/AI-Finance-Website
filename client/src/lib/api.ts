@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-netlify-site.netlify.app/api'
+  ? 'https://ai-finance-backend.railway.app/api'
   : 'http://localhost:5000/api';
 
 const api = axios.create({
