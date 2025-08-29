@@ -9,13 +9,39 @@ const generateToken = (id) => {
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, salary } = req.body;
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    
+    // Validation
+    if (!name || !email || !password || !salary) {
+      console.log('Missing required fields:', { name, email, password, salary });
+      return res.status(400).json({ 
+        message: 'All fields are required' 
+      });
     }
 
-    const user = await User.create({ name, email, password, salary });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'User already exists' 
+      });
+    }
+
+    // Create new user
+    const user = new User({
+      name,
+      email,
+      password,
+      salary
+    });
+
+    await user.save();
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     if (user) {
       // Send welcome email (don't wait for it)
@@ -24,15 +50,20 @@ const registerUser = async (req, res) => {
       );
       
       res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        salary: user.salary,
-        token: generateToken(user._id)
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email
+        }
       });
     }
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ 
+      message: 'Error registering user',
+      error: error.message 
+    });
   }
 };
 

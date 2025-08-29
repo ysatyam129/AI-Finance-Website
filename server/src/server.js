@@ -9,13 +9,26 @@ const seedRoutes = require('./routes/seedRoutes');
 const { checkLowBalance } = require('./utils/checkBalance');
 
 // Connect to database
-connectDB();
+connectDB().catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://ai-finance-website-sage.vercel.app',
+  credentials: true,
+}));
+app.options('*', cors({
+  origin: 'https://ai-finance-website-sage.vercel.app',
+  credentials: true,
+}));
 app.use(express.json());
+
 
 // Routes
 app.use('/api/auth', authRoutes);
