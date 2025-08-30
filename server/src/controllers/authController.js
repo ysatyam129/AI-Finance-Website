@@ -37,11 +37,7 @@ const registerUser = async (req, res) => {
     await user.save();
 
     // Generate token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = generateToken(user._id);
 
     if (user) {
       // Send welcome email (don't wait for it)
@@ -50,11 +46,14 @@ const registerUser = async (req, res) => {
       );
       
       res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
         token,
         user: {
-          id: user._id,
+          _id: user._id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          salary: user.salary
         }
       });
     }
@@ -75,10 +74,14 @@ const loginUser = async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
       res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        salary: user.salary,
+        success: true,
+        message: 'Login successful',
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          salary: user.salary
+        },
         token: generateToken(user._id)
       });
     } else {

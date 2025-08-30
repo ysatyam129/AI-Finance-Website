@@ -1,34 +1,49 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Tag, DollarSign, FileText, Mail, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { expenseAPI } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Calendar,
+  Tag,
+  DollarSign,
+  FileText,
+  Mail,
+  AlertTriangle,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { expenseAPI } from "@/lib/api";
 
 interface Expense {
   _id: string;
   category: string;
   amount: number;
   description: string;
-  date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'expenses' | 'balance' | 'categories';
+  type: "expenses" | "balance" | "categories";
   title: string;
   stats?: any;
 }
 
-export default function ExpenseModal({ isOpen, onClose, type, title, stats }: ExpenseModalProps) {
+export default function ExpenseModal({
+  isOpen,
+  onClose,
+  type,
+  title,
+  stats,
+}: ExpenseModalProps) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && type === 'expenses') {
+    if (isOpen && type === "expenses") {
       fetchExpenses();
     }
   }, [isOpen, type]);
@@ -37,73 +52,91 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
     setLoading(true);
     try {
       const response = await expenseAPI.getExpenses();
-      setExpenses(response.data);
+      // Ensure we have a valid array
+      setExpenses(Array.isArray(response) ? response : []);
     } catch (error) {
-      console.error('Error fetching expenses:', error);
+      console.error("Error fetching expenses:", error);
+      setExpenses([]); // Set to empty array on error
     } finally {
       setLoading(false);
     }
   };
 
+  // Early return if modal is not open
+  if (!isOpen) return null;
+
   const getCategoryIcon = (category: string) => {
     const icons: { [key: string]: string } = {
-      Food: '🍽️',
-      Transport: '🚗',
-      Entertainment: '🎬',
-      Shopping: '🛍️',
-      Bills: '💵',
-      Healthcare: '🏥',
-      Other: '💼'
+      Food: "🍽️",
+      Transport: "🚗",
+      Entertainment: "🎬",
+      Shopping: "🛍️",
+      Bills: "💵",
+      Healthcare: "🏥",
+      Other: "💼",
     };
-    return icons[category] || '💼';
+    return icons[category] || "💼";
   };
 
-  const renderExpensesList = () => (
-    <div className="space-y-4 max-h-96 overflow-y-auto">
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading expenses...</p>
-        </div>
-      ) : expenses.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-6xl mb-4">📊</div>
-          <p className="text-gray-500">No expenses found</p>
-        </div>
-      ) : (
-        expenses.map((expense) => (
-          <motion.div
-            key={expense._id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="text-2xl">{getCategoryIcon(expense.category)}</div>
-                <div>
-                  <div className="font-semibold text-gray-900">{expense.description}</div>
-                  <div className="text-sm text-gray-500 flex items-center space-x-4">
-                    <span className="flex items-center space-x-1">
-                      <Tag className="w-4 h-4" />
-                      <span>{expense.category}</span>
-                    </span>
-                    <span className="flex items-center space-x-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(expense.date).toLocaleDateString()}</span>
-                    </span>
+  const renderExpensesList = () => {
+    // Additional safety check
+    const safeExpenses = expenses || [];
+
+    return (
+      <div className="space-y-4 max-h-96 overflow-y-auto">
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p>Loading expenses...</p>
+          </div>
+        ) : safeExpenses.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">📊</div>
+            <p className="text-gray-500">No expenses found</p>
+          </div>
+        ) : (
+          safeExpenses.map((expense) => (
+            <motion.div
+              key={expense._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">
+                    {getCategoryIcon(expense.category)}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">
+                      {expense.description}
+                    </div>
+                    <div className="text-sm text-gray-500 flex items-center space-x-4">
+                      <span className="flex items-center space-x-1">
+                        <Tag className="w-4 h-4" />
+                        <span>{expense.category}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {new Date(expense.createdAt).toLocaleDateString()}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-red-600">
+                    -₹{expense.amount.toLocaleString()}
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-red-600">-₹{expense.amount.toLocaleString()}</div>
-              </div>
-            </div>
-          </motion.div>
-        ))
-      )}
-    </div>
-  );
+            </motion.div>
+          ))
+        )}
+      </div>
+    );
+  };
 
   const renderBalanceDetails = () => (
     <div className="space-y-6">
@@ -113,35 +146,67 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
             <DollarSign className="w-8 h-8 text-blue-600" />
             <div>
               <div className="text-sm text-blue-600">Monthly Salary</div>
-              <div className="text-2xl font-bold text-blue-800">₹{stats?.salary?.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-blue-800">
+                ₹{stats?.salary?.toLocaleString()}
+              </div>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-red-50 rounded-xl p-4">
           <div className="flex items-center space-x-3">
             <FileText className="w-8 h-8 text-red-600" />
             <div>
               <div className="text-sm text-red-600">Total Expenses</div>
-              <div className="text-2xl font-bold text-red-800">₹{stats?.totalExpenses?.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-red-800">
+                ₹{stats?.totalExpenses?.toLocaleString()}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className={`rounded-xl p-6 ${stats?.balancePercentage <= 10 ? 'bg-red-50 border-2 border-red-200' : 'bg-green-50'}`}>
+      <div
+        className={`rounded-xl p-6 ${
+          stats?.balancePercentage <= 10
+            ? "bg-red-50 border-2 border-red-200"
+            : "bg-green-50"
+        }`}
+      >
         <div className="flex items-center space-x-4">
-          <div className={`text-4xl ${stats?.balancePercentage <= 10 ? 'text-red-600' : 'text-green-600'}`}>
-            {stats?.balancePercentage <= 10 ? '⚠️' : '💵'}
+          <div
+            className={`text-4xl ${
+              stats?.balancePercentage <= 10 ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {stats?.balancePercentage <= 10 ? "⚠️" : "💵"}
           </div>
           <div>
-            <div className={`text-sm ${stats?.balancePercentage <= 10 ? 'text-red-600' : 'text-green-600'}`}>
+            <div
+              className={`text-sm ${
+                stats?.balancePercentage <= 10
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
               Remaining Balance
             </div>
-            <div className={`text-3xl font-bold ${stats?.balancePercentage <= 10 ? 'text-red-800' : 'text-green-800'}`}>
+            <div
+              className={`text-3xl font-bold ${
+                stats?.balancePercentage <= 10
+                  ? "text-red-800"
+                  : "text-green-800"
+              }`}
+            >
               ₹{stats?.remainingBalance?.toLocaleString()}
             </div>
-            <div className={`text-sm ${stats?.balancePercentage <= 10 ? 'text-red-600' : 'text-green-600'}`}>
+            <div
+              className={`text-sm ${
+                stats?.balancePercentage <= 10
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
               {stats?.balancePercentage?.toFixed(1)}% of salary remaining
             </div>
           </div>
@@ -159,16 +224,22 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
             <div>
               <h3 className="text-xl font-bold mb-2">Low Balance Alert!</h3>
               <p className="text-orange-100 mb-3">
-                Your remaining balance is ₹{stats?.remainingBalance?.toLocaleString()}, which is below ₹10,000.
+                Your remaining balance is ₹
+                {stats?.remainingBalance?.toLocaleString()}, which is below
+                ₹10,000.
               </p>
               <div className="bg-white/20 rounded-lg p-3 mb-3">
                 <div className="flex items-center space-x-2 text-sm">
                   <Mail className="w-4 h-4" />
-                  <span>Email notification has been sent to your registered email address</span>
+                  <span>
+                    Email notification has been sent to your registered email
+                    address
+                  </span>
                 </div>
               </div>
               <p className="text-sm text-orange-100">
-                Consider reviewing your expenses and planning your budget accordingly.
+                Consider reviewing your expenses and planning your budget
+                accordingly.
               </p>
             </div>
           </div>
@@ -197,14 +268,21 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
               <div className="flex items-center space-x-3">
                 <div className="text-3xl">{getCategoryIcon(category._id)}</div>
                 <div>
-                  <div className="font-semibold text-gray-900">{category._id}</div>
-                  <div className="text-sm text-gray-600">{category.count} transactions</div>
+                  <div className="font-semibold text-gray-900">
+                    {category._id}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {category.count} transactions
+                  </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-purple-600">₹{category.total.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  ₹{category.total.toLocaleString()}
+                </div>
                 <div className="text-sm text-gray-500">
-                  {((category.total / stats.totalExpenses) * 100).toFixed(1)}% of total
+                  {((category.total / stats.totalExpenses) * 100).toFixed(1)}%
+                  of total
                 </div>
               </div>
             </div>
@@ -216,11 +294,11 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
 
   const renderContent = () => {
     switch (type) {
-      case 'expenses':
+      case "expenses":
         return renderExpensesList();
-      case 'balance':
+      case "balance":
         return renderBalanceDetails();
-      case 'categories':
+      case "categories":
         return renderCategoriesBreakdown();
       default:
         return null;
@@ -258,7 +336,7 @@ export default function ExpenseModal({ isOpen, onClose, type, title, stats }: Ex
                 </Button>
               </div>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
               {renderContent()}
             </div>

@@ -27,7 +27,7 @@ export const expenseAPI = {
   getExpenses: async () => {
     try {
       const response = await api.get('/expenses');
-      return response.data;
+      return response.data; // This should be the expenses array directly
     } catch (error) {
       console.error('Error fetching expenses:', error);
       throw error;
