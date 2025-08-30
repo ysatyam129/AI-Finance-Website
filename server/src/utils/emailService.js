@@ -97,8 +97,8 @@ const checkAndSendAlerts = async () => {
       const totalExpenses = await Expense.aggregate([
         {
           $match: {
-            userId: user._id,
-            date: {
+            user: user._id,
+            createdAt: {
               $gte: new Date(currentYear, currentMonth, 1),
               $lt: new Date(currentYear, currentMonth + 1, 1)
             }
