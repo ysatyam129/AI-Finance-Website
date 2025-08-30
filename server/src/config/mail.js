@@ -1,10 +1,67 @@
 const nodemailer = require('nodemailer');
 
+// Primary configuration
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // Use TLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
+  }
+});
+
+// Alternative configuration for testing
+const alternativeTransporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
+
+// Test both configurations
+const testEmailConfig = async () => {
+  console.log('🔧 Testing email configurations...');
+  
+  try {
+    await transporter.verify();
+    console.log('✅ Primary email configuration working!');
+    return transporter;
+  } catch (error) {
+    console.log('❌ Primary config failed:', error.message);
+    
+    try {
+      await alternativeTransporter.verify();
+      console.log('✅ Alternative email configuration working!');
+      return alternativeTransporter;
+    } catch (altError) {
+      console.log('❌ Alternative config failed:', altError.message);
+      console.log('📧 Please ensure you have:');
+      console.log('   1. Enabled 2-Factor Authentication on your Gmail account');
+      console.log('   2. Generated an App Password (not your regular password)');
+      console.log('   3. Used the App Password in EMAIL_PASS environment variable');
+      console.log('   4. Try format: EMAIL_PASS=abcdefghijklmnop (no spaces)');
+      return null;
+    }
+  }
+};
+
+// Initialize working transporter
+let workingTransporter = transporter;
+testEmailConfig().then((result) => {
+  if (result) {
+    workingTransporter = result;
   }
 });
 
@@ -42,10 +99,12 @@ const sendLowBalanceAlert = async (userEmail, userName, remainingBalance, percen
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Enhanced low balance alert sent successfully');
+    const info = await workingTransporter.sendMail(mailOptions);
+    console.log('✅ Enhanced low balance alert sent successfully to:', userEmail);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending low balance email:', error.message);
+    return { success: false, error: error.message };
   }
 };
 
@@ -89,11 +148,41 @@ const sendWelcomeEmail = async (userEmail, userName) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Welcome email sent successfully');
+    const info = await workingTransporter.sendMail(mailOptions);
+    console.log('✅ Welcome email sent successfully to:', userEmail);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    console.error('❌ Error sending welcome email:', error.message);
+    // Don't throw error to prevent registration failure
+    return { success: false, error: error.message };
   }
 };
 
-module.exports = { sendLowBalanceAlert, sendWelcomeEmail };
+const sendTestEmail = async (toEmail) => {
+  const mailOptions = {
+    from: `"AI Finance Test" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: '🧪 Test Email from AI Finance',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2>✅ Email Configuration Test</h2>
+        <p>If you're seeing this email, your nodemailer configuration is working correctly!</p>
+        <p><strong>Sent at:</strong> ${new Date().toLocaleString()}</p>
+        <hr>
+        <p><small>This is a test email from AI Finance application.</small></p>
+      </div>
+    `
+  };
+
+  try {
+    const info = await workingTransporter.sendMail(mailOptions);
+    console.log('✅ Test email sent successfully!');
+    console.log('Message ID:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Test email failed:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+module.exports = { sendLowBalanceAlert, sendWelcomeEmail, sendTestEmail };

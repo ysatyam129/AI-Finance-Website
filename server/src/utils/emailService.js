@@ -31,7 +31,8 @@ const sendLowBalanceEmail = async (userEmail, userName, remainingBalance, percen
                 
                 <div class="alert-box">
                     <strong>Critical Alert:</strong> Your account balance is running low!<br>
-                    You have only <strong>${percentage}%</strong> of your monthly salary remaining.
+                    You have only <strong>₹${remainingBalance.toLocaleString()}</strong> remaining from your monthly salary.<br>
+                    This is below the recommended threshold of ₹10,000.
                 </div>
 
                 <div class="stats">
@@ -116,8 +117,8 @@ const checkAndSendAlerts = async () => {
       const remainingBalance = user.salary - monthlyExpenses;
       const balancePercentage = (remainingBalance / user.salary) * 100;
 
-      // Send alert if balance is 10% or less and no notification sent today
-      if (balancePercentage <= 10) {
+      // Send alert if balance is less than ₹10,000 and no notification sent today
+      if (remainingBalance < 10000) {
         const today = new Date().toDateString();
         const lastNotification = user.lastNotificationSent?.toDateString();
 
@@ -135,6 +136,10 @@ const checkAndSendAlerts = async () => {
           await User.findByIdAndUpdate(user._id, {
             lastNotificationSent: new Date()
           });
+
+          console.log(`Low balance alert sent to ${user.email} - Balance: ₹${remainingBalance}`);
+        } else {
+          console.log(`Alert already sent today to ${user.email}`);
         }
       }
     }

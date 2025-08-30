@@ -1,23 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { authAPI } from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
-import { useSonner } from '@/context/SonnerContext';
-import { Mail, Lock, User, DollarSign, ArrowLeft, Sparkles } from 'lucide-react';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { authAPI } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { useSonner } from "@/context/SonnerContext";
+import {
+  Mail,
+  Lock,
+  User,
+  DollarSign,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react";
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    salary: ''
+    name: "",
+    email: "",
+    password: "",
+    salary: "",
   });
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -29,17 +36,20 @@ export default function AuthForm() {
     setLoading(true);
 
     const loadingId = sonner.loading(
-      isLogin ? 'Signing in...' : 'Creating account...', 
-      'Please wait while we process your request'
+      isLogin ? "Signing in..." : "Creating account...",
+      "Please wait while we process your request"
     );
 
     try {
       if (isLogin) {
         const response = await authAPI.login(formData.email, formData.password);
         sonner.dismiss(loadingId);
-        sonner.success('Welcome back!', `Successfully signed in as ${response.data.name}`);
-        showSuccess('Login Successful', 'Welcome back to AI Finance!');
-        login(response.data, response.data.token);
+        sonner.success(
+          "Welcome back!",
+          `Successfully signed in as ${response.data.user.name}`
+        );
+        showSuccess("Login Successful", "Welcome back to AI Finance!");
+        login(response.data.user, response.data.token);
       } else {
         const response = await authAPI.register(
           formData.name,
@@ -48,15 +58,21 @@ export default function AuthForm() {
           Number(formData.salary)
         );
         sonner.dismiss(loadingId);
-        sonner.success('Account created!', `Welcome to AI Finance, ${response.data.name}!`);
-        showSuccess('Registration Successful', 'Your account has been created successfully!');
-        login(response.data, response.data.token);
+        sonner.success(
+          "Account created!",
+          `Welcome to AI Finance, ${response.data.user.name}!`
+        );
+        showSuccess(
+          "Registration Successful",
+          "Your account has been created successfully!"
+        );
+        login(response.data.user, response.data.token);
       }
     } catch (error: any) {
       sonner.dismiss(loadingId);
-      const errorMessage = error.response?.data?.message || 'An error occurred';
-      sonner.error('Authentication Failed', errorMessage);
-      showError('Error', errorMessage);
+      const errorMessage = error.response?.data?.message || "An error occurred";
+      sonner.error("Authentication Failed", errorMessage);
+      showError("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -79,7 +95,7 @@ export default function AuthForm() {
       >
         <Card className="backdrop-blur-xl bg-white/80 border-0 shadow-2xl shadow-blue-500/10 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/80 to-white/70"></div>
-          
+
           <CardHeader className="relative z-10 text-center pb-2">
             <motion.div
               initial={{ scale: 0 }}
@@ -89,22 +105,24 @@ export default function AuthForm() {
             >
               <Sparkles className="w-8 h-8 text-white" />
             </motion.div>
-            
+
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
               <AnimatePresence mode="wait">
                 <motion.span
-                  key={isLogin ? 'login' : 'register'}
+                  key={isLogin ? "login" : "register"}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {isLogin ? 'Welcome Back' : 'Join AI Finance'}
+                  {isLogin ? "Welcome Back" : "Join AI Finance"}
                 </motion.span>
               </AnimatePresence>
             </CardTitle>
             <p className="text-gray-600 text-sm mt-2">
-              {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
+              {isLogin
+                ? "Sign in to your account"
+                : "Create your account to get started"}
             </p>
           </CardHeader>
 
@@ -123,7 +141,9 @@ export default function AuthForm() {
                     <Input
                       placeholder="Full Name"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className="pl-12 h-12 bg-white/50 backdrop-blur-sm border-gray-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-300"
                       required
                     />
@@ -137,7 +157,9 @@ export default function AuthForm() {
                   type="email"
                   placeholder="Email Address"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="pl-12 h-12 bg-white/50 backdrop-blur-sm border-gray-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-300"
                   required
                 />
@@ -149,7 +171,9 @@ export default function AuthForm() {
                   type="password"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="pl-12 h-12 bg-white/50 backdrop-blur-sm border-gray-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-300"
                   required
                 />
@@ -169,7 +193,9 @@ export default function AuthForm() {
                       type="number"
                       placeholder="Monthly Salary (₹)"
                       value={formData.salary}
-                      onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, salary: e.target.value })
+                      }
                       className="pl-12 h-12 bg-white/50 backdrop-blur-sm border-gray-200/50 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-300"
                       required
                     />
@@ -181,9 +207,9 @@ export default function AuthForm() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform"
                   disabled={loading}
                 >
                   {loading ? (
@@ -194,13 +220,13 @@ export default function AuthForm() {
                   ) : (
                     <AnimatePresence mode="wait">
                       <motion.span
-                        key={isLogin ? 'login' : 'register'}
+                        key={isLogin ? "login" : "register"}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        {isLogin ? 'Sign In' : 'Create Account'}
+                        {isLogin ? "Sign In" : "Create Account"}
                       </motion.span>
                     </AnimatePresence>
                   )}
@@ -217,7 +243,7 @@ export default function AuthForm() {
                   <span className="px-4 bg-white/80 text-gray-500">or</span>
                 </div>
               </div>
-              
+
               <motion.button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
@@ -226,7 +252,9 @@ export default function AuthForm() {
                 whileTap={{ scale: 0.95 }}
               >
                 <span>
-                  {isLogin ? 'Need an account? Sign up' : 'Already have an account? Sign in'}
+                  {isLogin
+                    ? "Need an account? Sign up"
+                    : "Already have an account? Sign in"}
                 </span>
                 <ArrowLeft className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </motion.button>

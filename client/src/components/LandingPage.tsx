@@ -209,7 +209,7 @@ export default function LandingPage() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3"
+                className="border-white text-white bg-transparent  hover:bg-white hover:text-blue-600 text-lg px-8 py-3"
               >
                 Contact Sales
               </Button>
