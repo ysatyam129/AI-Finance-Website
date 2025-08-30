@@ -1,23 +1,27 @@
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
   category: {
     type: String,
-    required: [true, 'Category is required']
+    required: true,
+    enum: ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Healthcare', 'Other']
   },
   amount: {
     type: Number,
-    required: [true, 'Amount is required'],
-    min: [0, 'Amount cannot be negative']
+    required: true
   },
   description: {
     type: String,
-    default: ''
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true

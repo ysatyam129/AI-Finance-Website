@@ -1,34 +1,47 @@
 const Expense = require('../models/Expense');
-const mongoose = require('mongoose');
 
 const getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ user: req.user._id });
+    const expenses = await Expense.find({ userId: req.user._id }).sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
-    console.error('Get expenses error:', error);
-    res.status(500).json({ message: 'Error fetching expenses' });
+    res.status(500).json({ message: error.message });
   }
 };
 
-const getExpenseStats = async (req, res) => {
+const addExpense = async (req, res) => {
   try {
-    console.log('Getting expense stats for user:', req.user._id);
+    const { category, amount, description } = req.body;
     
-    // Check if user exists and has valid ObjectId
-    if (!req.user || !req.user._id) {
-      console.error('Invalid user object:', req.user);
-      return res.status(400).json({ message: 'Invalid user information' });
-    }
+    const expense = await Expense.create({
+      userId: req.user._id,
+      category,
+      amount,
+      description
+    });
 
-    // Validate that the user ID is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(req.user._id)) {
-      console.error('Invalid ObjectId format:', req.user._id);
-      return res.status(400).json({ message: 'Invalid user ID format' });
-    }
+    res.status(201).json(expense);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-    const stats = await Expense.aggregate([
-      { $match: { user: new mongoose.Types.ObjectId(req.user._id) } },
+const getMonthlyStats = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const monthlyExpenses = await Expense.aggregate([
+      {
+        $match: {
+          userId: req.user._id,
+          date: {
+            $gte: new Date(currentYear, currentMonth, 1),
+            $lt: new Date(currentYear, currentMonth + 1, 1)
+          }
+        }
+      },
       {
         $group: {
           _id: '$category',
@@ -38,42 +51,20 @@ const getExpenseStats = async (req, res) => {
       }
     ]);
 
-    console.log('Stats retrieved successfully:', stats);
-    res.json(stats);
+    const totalExpenses = monthlyExpenses.reduce((sum, item) => sum + item.total, 0);
+    const remainingBalance = req.user.salary - totalExpenses;
+    const balancePercentage = (remainingBalance / req.user.salary) * 100;
+
+    res.json({
+      monthlyExpenses,
+      totalExpenses,
+      remainingBalance,
+      balancePercentage,
+      salary: req.user.salary
+    });
   } catch (error) {
-    console.error('Get stats error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      user: req.user ? req.user._id : 'undefined'
-    });
-    res.status(500).json({ 
-      message: 'Error fetching expense statistics',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-const addExpense = async (req, res) => {
-  try {
-    const { category, amount, description } = req.body;
-    
-    if (!category || !amount) {
-      return res.status(400).json({ message: 'Category and amount are required' });
-    }
-
-    const expense = await Expense.create({
-      user: req.user._id,
-      category,
-      amount: Number(amount),
-      description
-    });
-
-    res.status(201).json(expense);
-  } catch (error) {
-    console.error('Add expense error:', error);
-    res.status(500).json({ message: 'Error adding expense' });
-  }
-};
-
-module.exports = { getExpenses, addExpense, getExpenseStats };
+module.exports = { getExpenses, addExpense, getMonthlyStats };
